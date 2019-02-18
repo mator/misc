@@ -18,8 +18,8 @@ for line in output.split('\n'):
         dash = dash+1
     elif dash == 2 :
         data = line.split(' ')
-		#
-		# if disk state is not Optimal , print and exit
+        #
+        # if disk state is not Optimal , print and exit
         if data[4] != 'Optl' :
             print(output)
             quit()
