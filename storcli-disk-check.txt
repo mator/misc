@@ -1,0 +1,31 @@
+CLI Version = 007.0409.0000.0000 Nov 06, 2017
+Operating system = Linux4.19.7-300.fc29.x86_64
+Controller = 0
+Status = Success
+Description = None
+
+
+Virtual Drives :
+==============
+
+---------------------------------------------------------------
+DG/VD TYPE  State Access Consist Cache Cac sCC       Size Name 
+---------------------------------------------------------------
+0/0   RAID0 Optl  RW     Yes     NRWBC -   ON  557.861 GB      
+1/1   RAID0 Optl  RW     Yes     NRWBC -   ON  557.861 GB      
+2/2   RAID0 Optl  RW     Yes     NRWBC -   ON  557.861 GB      
+3/3   RAID0 Optl  RW     Yes     NRWBC -   ON  557.861 GB      
+4/4   RAID0 Optl  RW     Yes     NRWBC -   ON  557.861 GB      
+5/5   RAID0 Optl  RW     Yes     NRWBC -   ON  557.861 GB      
+6/6   RAID0 Optl  RW     Yes     NRWBC -   ON  557.861 GB      
+7/7   RAID0 Optl  RW     Yes     NRWBC -   ON  557.861 GB      
+---------------------------------------------------------------
+
+Cac=CacheCade|Rec=Recovery|OfLn=OffLine|Pdgd=Partially Degraded|Dgrd=Degraded
+Optl=Optimal|RO=Read Only|RW=Read Write|HD=Hidden|TRANS=TransportReady|B=Blocked|
+Consist=Consistent|R=Read Ahead Always|NR=No Read Ahead|WB=WriteBack|
+AWB=Always WriteBack|WT=WriteThrough|C=Cached IO|D=Direct IO|sCC=Scheduled
+Check Consistency
+
+
+
