@@ -1,9 +1,12 @@
 #!/usr/bin/python3
 
 # used as a cron checker
+# use --test to check agains test file storcli-disk-failed.txt
 
 import subprocess
 import sys
+
+err = 0
 
 if len(sys.argv) > 1 and sys.argv[1] == '--test':
     f = open("storcli-disk-failed.txt", "r")
@@ -11,11 +14,14 @@ if len(sys.argv) > 1 and sys.argv[1] == '--test':
     f.close()
     output = ""
     output = output.join(freadlist)
-    err = 0
 else:
-    cmd = [ "/usr/bin/storcli", "/c0/vall", "show" ]
-    cp = subprocess.run(cmd, capture_output=True, universal_newlines=True, check=True)
-    output, rc, err = cp.stdout, cp.returncode, cp.stderr
+    try:
+        cmd = [ "/usr/bin/storcli", "/c0/vall", "show" ]
+        cp = subprocess.run(cmd, capture_output=True, universal_newlines=True, check=True)
+        output, rc, err = cp.stdout, cp.returncode, cp.stderr
+    except:
+        print("exception running " + ' '.join(cmd))
+        quit()
 
 if err:
     print(rc, err)
