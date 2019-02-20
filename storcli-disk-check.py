@@ -3,10 +3,18 @@
 # used as a cron checker
 
 import subprocess
+import sys
 
-cmd = [ "/usr/bin/storcli", "/c0/vall", "show" ]
-cp = subprocess.run(cmd, capture_output=True, universal_newlines=True, check=True)
-output, rc, err = cp.stdout, cp.returncode, cp.stderr
+if len(sys.argv) > 1 and sys.argv[1] == '--test':
+    f = open("storcli-disk-failed.txt", "r")
+    freadlist = f.readlines()
+    output = ""
+    output = output.join(freadlist)
+    err = 0
+else:
+    cmd = [ "/usr/bin/storcli", "/c0/vall", "show" ]
+    cp = subprocess.run(cmd, capture_output=True, universal_newlines=True, check=True)
+    output, rc, err = cp.stdout, cp.returncode, cp.stderr
 
 if err:
     print(rc, err)
