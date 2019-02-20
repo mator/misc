@@ -8,6 +8,7 @@ import sys
 if len(sys.argv) > 1 and sys.argv[1] == '--test':
     f = open("storcli-disk-failed.txt", "r")
     freadlist = f.readlines()
+    f.close()
     output = ""
     output = output.join(freadlist)
     err = 0
