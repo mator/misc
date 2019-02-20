@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 
 # used as a cron checker
 # use --test to check agains test file storcli-disk-failed.txt
@@ -40,4 +40,4 @@ for line in output.split('\n'):
             quit()
 
 
-# vim: set expandtab ts=4 sw=4:
+# vim: set syntax=python:
