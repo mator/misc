@@ -1,7 +1,9 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 # used as a cron checker
 # use --test to check agains test file storcli-disk-failed.txt
+
+# python3 as a requirement for subprocess.run()
 
 import subprocess
 import sys
