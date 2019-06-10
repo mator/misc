@@ -25,7 +25,8 @@ function LPAR_tab1() {
 		vg_ppsize=$(lsvg $vg | awk '/PP SIZE/ {print $6}')
 		vg_ppdist=$filler
 
-		lsvg -l $vg | sed 1,2d | awk '{print $1,"\t",$2,"\t",$7}' | while read lv lvtype fs; do
+		# lvtype in cluster configurations can be NULL, so we check numbers of records (NF) in awk, to make sure we get right information
+		lsvg -l $vg | sed 1,2d | awk '{ if (NF==7) {print $1,"\t",$2,"\t",$7} else {print $1,"\t'$filler'\t",$6} }' | while read lv lvtype fs; do
 
 			fssize=$(getconf DISK_SIZE "/dev/$lv")
 			lvinterpol=$(lslv $lv | awk '/INTER-POLICY/ {print $2}')
@@ -146,6 +147,7 @@ function LPAR_tab2 {
 		[ "x$hd_hcheck_cmd" == "x" ] && hd_hcheck_cmd=$filler
 		[ "x$hd_hcheck_int" == "x" ] && hd_hcheck_int=$filler
 		[ "x$hd_hcheck_mod" == "x" ] && hd_hcheck_mod=$filler
+		[ "x$hd_maxtransfer" == "x" ] && hd_maxtransfer=$filler
 
 		echo -ne "$hd_maxtransfer\t $hd_qdepth\t $hd_rpol\t $hd_algo\t $hd_hcheck_cmd\t $hd_hcheck_int\t $hd_hcheck_mod\t"
 		# local Lun Serial Node Uid Fru Ploc
@@ -230,15 +232,15 @@ function LPAR_tab3 {
 				;;
 
 			vsc ) 
+				# the only 2 attributes for vscsiX adapters is vscsi_err_recov and queue depth
+				a_vscsie=$(lsattr -El $a_name | awk '/vscsi_err_recov/ {print $2}')
 				if [ "$a_status" == "Available" ]; then
-					# the only 2 attributes for vscsiX adapters is vscsi_err_recov and queue depth
-					a_vscsie=$(lsattr -El $a_name | awk '/vscsi_err_recov/ {print $2}')
-
 					# queue depth
 					# 
 					a_queue=$(lspath -p $a_name -F name | sort | uniq | while read hdisk; do 
 						lsattr -El $hdisk -a queue_depth -F value; 
 					done | awk '{ sum += $1 } END { print sum }')
+					[ "x$a_queue" == "x" ] && a_queue=0
 				fi
 
 				#printf "%-10s %10s %10s %10s %10s %10s\n" $a_name $a_maxfer $a_numcmd $a_scsidev $a_vscsie $a_dyntrk
@@ -323,6 +325,7 @@ function LPAR_tab5 {
 					# get queue depth
 					a_queue=$(lsattr -El $a_aixtdev -a queue_depth -F value)
 					[ "x$a_queue" == "x" ] && a_queue=$filler
+					[ "x$a_transfer" == "x" ] && a_transfer=$filler
 				#else # all other VTD
 					# a_aixtdev is XML-file with leading dot in basename or logical volume
 					#local dir1 name1 name2
@@ -371,6 +374,9 @@ function LPAR_tab5 {
 				
 				a_queue=$(lsattr -El $a_hdisk -a queue_depth -F value)
 				[ "x$a_queue" == "x" ] && a_queue=$filler
+				[ "x$a_vios" == "x" ] && a_vios=$filler
+				[ "x$a_vhost" == "x" ] && a_vhost=$filler
+				[ "x$a_transfer" == "x" ] && a_transfer=$filler
 
 				printf "$f_header" $HOST $a_vios $a_hdisk $a_conn $a_pvid $a_vhost $a_parent $a_transfer $a_queue
 			done
@@ -561,16 +567,15 @@ function LPAR_tab7 {
     # process virtual adapters
 	local a_virtdesc=$(echo "Virtual I/O Ethernet Adapter (l-lan)" | tr ' ' '.')
 	local a_virtlist=$(echo "$a_ethlist" | awk -F, '/Virtual I\/O Ethernet Adapter/ { print $1}')
-	local a_virt a_virthw a_virtloc a_virttag a_virtstatus
+	local a_virt a_virthw a_virtloc a_virttag 
 	for a_virt in $a_virtlist; do
-		a_virtstatus=$(lsdev -l $a_virt -F status)
-		if [ "$a_virtstatus" == "Defined" ]; then
+		a_status=$(echo "$a_ethlist" | grep "${a_virt}," | awk -F, '{print $4}')
+		if [ "$a_status" == "Defined" ]; then
 			a_virthw=$filler
 		else
 			a_virthw=$(lscfg -vpl $a_virt | grep "Network Address"  | tr '.' ' ' | awk '{print $3}')
 		fi
 		a_virtloc=$(echo "$a_ethlist" | grep "${a_virt}," | awk -F, '{print $3}')
-		a_status=$(echo "$a_ethlist" | grep "${a_virt}," | awk -F, '{print $4}')
 		#a_virtspeed=$(echo "$a_ethportspeed" | awk '$3 ~ /'$a_virt'/ {getline; if ($0 ~ /Media/) {print} else {print "'$filler'"}}')
 		a_virtspeed=$(f_ethernet_speed "$a_ethportspeed" $a_virt)
 		a_virtip=$(f_check_ip $a_virt)
@@ -582,6 +587,7 @@ function LPAR_tab7 {
 		else
 			a_vlans=""
 		fi
+		[ "x$a_virtspeed" == "x" ] && a_virtspeed=$filler
 		printf "$f_header" $HOST $a_virt $a_status $a_virtdesc $a_virthw "$a_virtlink" "$a_virtspeed" $filler $filler $a_virtloc $a_virtip $a_virttag $a_vlans
 	done
 
@@ -590,9 +596,9 @@ function LPAR_tab7 {
     a_logidesc=$(echo "Logical Host Ethernet Port (lp-hea)" | tr ' ' '.')
     a_logilist=$(echo "$a_ethlist" | awk -F, '/Logical Host Ethernet Port/ { print $1}')
     for a_logi in $a_logilist; do
+		a_status=$(echo "$a_ethlist" | grep "${a_logi}," | awk -F, '{print $4}')
         a_logihw=$(lscfg -vpl $a_logi | grep "Network Address"  | tr '.' ' ' | awk '{print $3}')
         a_logiloc=$(echo "$a_ethlist" | grep "${a_logi}," | awk -F, '{print $3}')
-		a_status=$(echo "$a_ethlist" | grep "${a_logi}," | awk -F, '{print $4}')
 		a_logispeed=$(f_ethernet_speed "$a_ethportspeed" $a_logi)
 		a_logiip=$(f_check_ip $a_logi)
 		a_logilink=$(f_ethernet_link "$a_ethportstatus" $a_logi)
@@ -603,6 +609,7 @@ function LPAR_tab7 {
         else
             a_vlans=""
         fi
+		[ "x$a_logispeed" == "x" ] && a_logispeed=$filler
 		printf "$f_header" $HOST $a_logi $a_status $a_logidesc $a_logihw "$a_logilink" "$a_logispeed" $filler $filler $a_logiloc $a_logiip $a_logitag $a_vlans
     done
 
@@ -627,6 +634,7 @@ function LPAR_tab7 {
         else
             a_vlans=""
         fi
+		[ "x$a_laspeed" == "x" ] && a_laspeed=$filler
 		printf "$f_header" $HOST $a_la $a_status $a_ladesc $a_lahw "$a_lalink" "$a_laspeed" $a_labase $a_labackup $a_laloc $a_laip $a_latag $a_vlans
 	done
 
@@ -650,6 +658,7 @@ function LPAR_tab7 {
             a_vlans=""
         fi
         # echo $a_sea $a_seahw $a_sealoc $a_seadesc
+		[ "x$a_seaspeed" == "x" ] && a_seaspeed=$filler
 		printf "$f_header" $HOST $a_sea $a_status $a_seadesc $a_seahw "$a_sealink" "$a_seaspeed" $filler $filler $a_sealoc $a_seaip $a_seatag $a_vlans
     done
 
@@ -676,6 +685,7 @@ function LPAR_tab7 {
 				else
 					a_vlans=""
 				fi
+				[ "x$a_physpeed" == "x" ] && a_physpeed=$filler
 				#echo $a_phys $a_physhw $a_physloc $a_physdesc
 				printf "$f_header" $HOST $a_phys $a_status $a_physdesc $a_physhw "$a_physlink" "$a_physpeed" $filler $filler $a_physloc $a_physip $a_phystag $a_vlans
 			fi
