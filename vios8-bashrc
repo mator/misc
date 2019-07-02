@@ -1,0 +1,10 @@
+
+PS1='[\u@\h \w]\$ '
+export PS1
+
+alias i=/usr/ios/cli/ioscli
+
+export PAGER=less
+
+[ -d /usr/DynamicLinkManager/bin ] && echo $PATH | grep -q DynamicLinkManager || PATH=$PATH:/usr/DynamicLinkManager/bin
+
