@@ -1,0 +1,60 @@
+#!/bin/bash
+#
+# chkconfig: 12345 25 75
+# description: Controls availability of block devices
+#
+# For Red-Hat-based distributions such as Fedora, RHEL, CentOS.
+#	       
+### BEGIN INIT INFO
+# Provides: blk-availability
+# Required-Start:
+# Required-Stop:
+# Default-Start: 1 2 3 4 5
+# Default-Stop: 0 6
+# Short-Description: Availability of block devices
+### END INIT INFO
+
+. /etc/init.d/functions
+
+sbindir=/sbin
+
+MTCG=mt-cg-smpp
+MTCG_PATH="/opt/cs"
+MTCG_BIN=$MTCG_PATH/$MTCG
+MTCG_CONF=$MTCG_PATH/mt-cg-smpp.toml
+LOGLEVEL=daemon.info
+
+case "$1" in
+  start)
+        echo -n "Starting $MTCG service: "
+        if [ ! -f $MTCG_CONF ]; then
+                echo "Failed to find configuration file $MTCG_CONF"
+                failure
+                exit 1
+        fi
+        cd $MTCG_PATH
+        nohup $MTCG_BIN $MTCG_CONF | logger -n localhost -p $LOGLEVEL -t $MTCG &
+        RETVAL=$?
+        if [ $RETVAL -eq 0 ]; then
+                echo_success
+                PID=$(pidofproc $MTCG)
+                /usr/bin/logger -n localhost -p $LOGLEVEL -t "${MTCG}[${PID}]" started
+        else
+                failure
+        fi
+        ;;
+
+  stop)
+        echo -n "Shutting down ${MTCG}: "
+        PID=$(pidofproc $MTCG)
+        killproc $MTCG
+        [ "x$PID" != "x" ] && /usr/bin/logger -n localhost -p $LOGLEVEL -t "${MTCG}[${PID}]" stopped
+	;;
+
+  status)
+	status $MTCG
+	;;
+  *)
+	echo $"Usage: $0 {start|stop|status}"
+	;;
+esac
