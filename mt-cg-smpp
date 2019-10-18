@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # chkconfig: 12345 25 75
-# description: Controls availability of block devices
+# description: mt-cg-smpp
 #
 # For Red-Hat-based distributions such as Fedora, RHEL, CentOS.
 #	       
