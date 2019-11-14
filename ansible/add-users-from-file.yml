@@ -1,6 +1,6 @@
 ---
 - name: add users to servers and sudoers as admins
-  hosts: localhost
+  hosts: servers
   become: true
   gather_facts: false
   vars:
