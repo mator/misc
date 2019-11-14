@@ -1,0 +1,19 @@
+---
+- name: delete test local users
+  hosts: localhost
+  gather_facts: false
+  become: true
+  vars:
+    groupname: wheel
+
+  tasks:
+    - name: read usernames from a file
+      include_vars:
+        file: vars/testusers.yaml
+
+    - name: remove user(s)
+      user:
+        name: "{{ item }}"
+        state: absent
+        groups: "{{ groupname }}"
+      loop: "{{ usernames }}"

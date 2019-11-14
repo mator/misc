@@ -1,0 +1,26 @@
+---
+- name: add users to servers and sudoers as admins
+  hosts: localhost
+  become: true
+  vars:
+    groupname: wheel
+    usernames:
+      - user1
+
+  tasks:
+#    - debug:
+#        msg: "{{ usernames }}"
+
+    - name: add users
+      user:
+        name: "{{ item }}"
+        state: present
+        groups: "{{ groupname }}"
+      loop: "{{ usernames }}"
+
+    - name: Set authorized keys from a users from file
+      authorized_key:
+        user: "{{ item }}"
+        state: present
+        key: "{{ lookup('file', 'ssh-keys/{{item}}.pub') }}"
+      loop: "{{ usernames }}"

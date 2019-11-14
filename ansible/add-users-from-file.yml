@@ -1,0 +1,41 @@
+---
+- name: add users to servers and sudoers as admins
+  hosts: localhost
+  become: true
+  gather_facts: false
+  vars:
+    groupname: wheel
+#    usernames:
+#    - user1
+#    - user2
+
+  tasks:
+# users defined either via vars: above or via following task
+    - name: read usernames from a file
+      include_vars:
+        file: vars/testusers.yaml
+
+    - name: add users
+      user:
+        name: "{{ item }}"
+        state: present
+        groups: "{{ groupname }}"
+      loop: "{{ usernames }}"
+      # debug: msg="{{ item }}"
+
+    - name: Set authorized keys from a users from file
+      authorized_key:
+        user: "{{ item }}"
+        state: present
+        key: "{{ lookup('file', 'ssh-keys/{{item}}.pub') }}"
+      loop: "{{ usernames }}"
+
+    - name: add '{{ groupname }}' group to sudo
+      lineinfile:
+        path: /etc/sudoers
+        state: present
+        regexp: '^%{{ groupname }} '
+        insertafter: '^#%{{ groupname }} '
+        line: '%{{ groupname }}  ALL=(ALL)       NOPASSWD: ALL'
+        validate: /sbin/visudo -cf %s
+
