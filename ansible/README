@@ -1,0 +1,24 @@
+Quickly provision (or delete) sudo users to servers via ansible.
+
+Install ansible:
+
+$ [apt|dnf] install -y ansible yamllint
+
+Create a userlist via directly editing playbook or via vars/users.yml
+Copy users ssh public keys to ssh-keys/$username.pub
+
+Check for correctness of any yaml files you've edited via:
+
+$ ansible-lint 
+
+or 
+
+$ yamllint
+
+Check for hosts on which playbook runs:
+
+$ ansible-playbook --list-hosts playbook.yaml
+
+Run playbook:
+
+$ ansible-playbook add-users.yaml
