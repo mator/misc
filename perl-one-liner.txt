@@ -1,0 +1,4 @@
+# TZ=Asia/Dubai \
+  journalctl -S "2019-12-24" -U "2019-12-25" | \
+  perl -lne 'print "$2" if /close_ttl=(\d+).* mac=(.*) redirect/ and $1>60' | \
+  sort | uniq -c | sort -n
