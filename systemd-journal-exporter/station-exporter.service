@@ -1,0 +1,11 @@
+[Unit]
+Description=station exporter
+After=network.target
+
+[Service]
+ExecStart=/opt/station-exporter.py
+Type=simple
+PIDFile=/run/station-exporter.pid
+
+[Install]
+WantedBy=default.target
