@@ -6,11 +6,9 @@
     groupname: wheel
     usernames:
       - user1
+      - user2
 
   tasks:
-#    - debug:
-#        msg: "{{ usernames }}"
-
     - name: add users
       user:
         name: "{{ item }}"
@@ -24,3 +22,15 @@
         state: present
         key: "{{ lookup('file', 'ssh-keys/{{item}}.pub') }}"
       loop: "{{ usernames }}"
+
+    - name: list created user
+      command:
+        cmd: id -a "{{ item }}"
+      with_items: "{{ usernames }}"
+      register: result
+      ignore_errors: yes
+      changed_when: false
+
+    - debug:
+        msg: "{{ item['stdout'] }}"
+      loop: '{{ result.results }}'
