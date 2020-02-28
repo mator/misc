@@ -3,6 +3,7 @@
 Description=station exporter
 After=network.target systemd-journald.service
 Requires=systemd-journald.service
+#Wants=unit_to_watch_logs_on.service
 
 [Service]
 ExecStart=/opt/station-exporter.py
