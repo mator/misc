@@ -1,0 +1,1 @@
+root@vcenter [ ~ ]# /usr/lib/vmware-vmon/vmon-cli -U statsmonitor -S AUTOMATIC
