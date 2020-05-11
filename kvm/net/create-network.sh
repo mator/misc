@@ -6,14 +6,14 @@ if [ "$1" == "" ]; then
 fi
 
 networkname="$1"
-networkfile=`mktemp`
+networkfile=$(mktemp)
 
-sed "s/netname/$networkname/" net-template.xml > $networkfile
+sed "s/netname/$networkname/" net-template.xml > "$networkfile"
 
-virsh net-define $networkfile
-rm $networkfile
-virsh net-autostart $networkname
-virsh net-start $networkname
+virsh net-define "$networkfile"
+rm "$networkfile"
+virsh net-autostart "$networkname"
+virsh net-start "$networkname"
 
 
 echo
