@@ -1,3 +1,4 @@
+## systemd journald logs exporter written in python
 
 basic prometheus exporter as a "Counter" from systemd logs.
 
@@ -14,3 +15,16 @@ and add an exporter to prometheus configuration, for example:
         labels:
           env: logmetric1
 ```  
+
+## j.wait() vs j.process() :
+
+profiled with:
+```
+$ timeout --signal sigint 10s python -m cProfile wait.py &> wait.txt
+$ timeout --signal sigint 10s python -m cProfile process.py &> process.txt
+```
+and compared difference with vimdiff:
+```
+$ vimdiff wait.txt process.txt
+```
+j.wait() wins
